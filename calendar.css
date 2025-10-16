@@ -1,0 +1,97 @@
+/* Sidebar Styles */
+.sidebar {
+  background: #232830;
+  width: 235px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 30px;
+  z-index: 30;
+  border-right: 1.5px solid #222b33;
+}
+.sidebar-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 34px;
+  padding-left: 28px;
+}
+.sidebar-squares {
+  display: flex;
+  gap: 2px;
+}
+.sq1 { width: 16px; height: 16px; background: #e0582a; border-radius: 2px; }
+.sq2 { width: 16px; height: 16px; background: #359b46; border-radius: 2px; }
+.sq3 { width: 16px; height: 16px; background: #eec443; border-radius: 2px; }
+.sq4 { width: 16px; height: 16px; background: #3488b8; border-radius: 2px; }
+.sidebar-title {
+  color: #eaf5e6;
+  font-size: 1.1rem;
+  font-family: Georgia, serif;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.sidebar .nav-link {
+  color: #dedfe2;
+  font-size: 1.09rem;
+  padding: 13px 26px;
+  border-radius: 7px;
+  margin-bottom: 3px;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  transition: background 0.18s, color 0.17s;
+}
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+  background: #1598e6;
+  color: #fff;
+  font-weight: 500;
+  border-right: 4px solid #29c67f;
+}
+.sidebar .nav-link i {
+  font-size: 1rem;
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding-bottom: 15px;
+    border-right: none;
+  }
+  .main-panel { margin-left: 0 !important; }
+}
+
+/* Adjust for content not to go under sidebar */
+.main-panel {
+  margin-left: 235px;
+  background: #f8fafc;
+  min-height: 100vh;
+  padding-top: 32px;
+  padding-bottom: 32px;
+  transition: margin-left 0.13s;
+}
+
+
+.admin-manager-card {
+  background: #fff;
+  border-radius: 7px;
+  box-shadow: 0 2px 12px rgba(40,80,160,0.03);
+  padding: 30px 30px 30px 30px;
+  margin-bottom: 18px;
+  margin-top: 10px;
+}
+.calendar-box {
+  background: #f6faff;
+  border-radius: 6px;
+  margin-top: 10px;
+  padding: 22px;
+  box-shadow: 0 1px 4px rgba(30,80,160,0.08);
+}
