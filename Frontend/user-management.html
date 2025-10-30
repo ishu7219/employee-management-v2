@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="user.css">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo-row">
+      <div class="sidebar-squares">
+        <div class="sq1"></div>
+        <div class="sq2"></div>
+        <div class="sq3"></div>
+        <div class="sq4"></div>
+      </div>
+      <span class="sidebar-title">ADMIN PANEL</span>
+    </div>
+    <nav class="flex-column">
+      <a href="user-management.html" class="nav-link active"><i class="fa fa-users"></i> User Management</a>
+      <a href="system-management.html" class="nav-link"><i class="fa fa-sliders-h"></i> Salary management</a>
+      <a href="leave-management.html" class="nav-link"><i class="fa fa-calendar-xmark"></i> Leave management</a>
+      <a href="calendar.html" class="nav-link"><i class="fa fa-calendar-day"></i> Calendar</a>
+      <a href="settings.html" class="nav-link"><i class="fa fa-gear"></i> Settings</a>
+    </nav>
+  </div>
+
+  <div class="main-panel">
+    <div class="header-row">
+      <h3 style="font-weight:600;">Admin Manager</h3>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">Home</li>
+          <li class="breadcrumb-item active" aria-current="page">User</li>
+        </ol>
+      </nav>
+    </div>
+
+    <div class="admin-manager-card">
+      <label style="font-weight:500;">Search</label>
+      <div class="search-row mt-2">
+        <label style="color:#555;">Search by employee name</label>
+        <input type="text" id="searchEmpName" placeholder="Employee name"/>
+        <button class="btn btn-success" onclick="searchUsers()">Search</button>
+        <button class="btn btn-danger" onclick="clearSearch()">Clear</button>
+      </div>
+    </div>
+
+    <div class="table-box">
+      <div class="add-emp-row">
+        <button class="btn btn-add-employee" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+          <i class="fa fa-plus"></i> Add Employee
+        </button>
+      </div>
+
+      <label style="font-weight:500; margin-bottom:7px;">Admin</label>
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr>
+            <th style="width:32px;">S.N</th>
+            <th>Username</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Leaves count</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="addEmployeeForm" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addEmployeeModalLabel">Add Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Message alert -->
+          <div id="addMessage"></div>
+
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="newUsername" placeholder="Username" required>
+            <label for="newUsername">Username</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="newEmail" placeholder="Email" required>
+            <label for="newEmail">Email</label>
+          </div>
+          <div class="form-floating mb-3">
+            <select class="form-select" id="newRole" required>
+              <option value="admin" selected>admin</option>
+              <option value="user">user</option>
+            </select>
+            <label for="newRole">Role</label>
+          </div>
+          <div class="form-floating mb-3">
+            <input type="number" min="0" class="form-control" id="newLeaves" placeholder="Leaves count" value="0" required>
+            <label for="newLeaves">Leaves count</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Add</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS and Custom Script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let employees = [];
+
+    async function fetchEmployees() {
+      const response = await fetch('http://localhost:3000/api/users');
+      employees = await response.json();
+    }
+
+    async function renderTable(filteredList) {
+      if (!filteredList) await fetchEmployees();
+      const list = filteredList || employees;
+      const tbody = document.getElementById('userTableBody');
+      tbody.innerHTML = '';
+      list.forEach((emp, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${emp.username}</td>
+          <td>${emp.role}</td>
+          <td>${emp.email}</td>
+          <td>${emp.leaves}</td>
+          <td>
+            <button class="action-btn btn-view" onclick="viewEmployee(${emp.id})">View</button>
+            <button class="action-btn btn-edit" onclick="editEmployee(${emp.id})">Edit</button>
+            <button class="action-btn btn-delete" onclick="deleteEmployee(${emp.id})">Delete</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function searchUsers() {
+      const term = document.getElementById('searchEmpName').value.trim().toLowerCase();
+      await fetchEmployees();
+      if (!term) return renderTable();
+      const filtered = employees.filter(emp => emp.username.toLowerCase().includes(term));
+      renderTable(filtered);
+    }
+
+    function clearSearch() {
+      document.getElementById('searchEmpName').value = '';
+      renderTable();
+    }
+
+    // Add employee
+    document.getElementById('addEmployeeForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const username = document.getElementById('newUsername').value.trim();
+      const email = document.getElementById('newEmail').value.trim();
+      const role = document.getElementById('newRole').value;
+      const leaves = Number(document.getElementById('newLeaves').value);
+      const msgDiv = document.getElementById('addMessage');
+
+      msgDiv.innerHTML = ''; // clear previous messages
+
+      try {
+        const response = await fetch('http://localhost:3000/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, role, email, leaves })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          msgDiv.innerHTML = `<div class="alert alert-danger" role="alert">${data.error || data.message || 'Failed to add employee'}</div>`;
+          return;
+        }
+
+        msgDiv.innerHTML = `<div class="alert alert-success" role="alert">Employee added successfully!</div>`;
+        await renderTable();
+        event.target.reset();
+
+        setTimeout(() => {
+          bootstrap.Modal.getInstance(document.getElementById('addEmployeeModal')).hide();
+        }, 1000);
+      } catch (error) {
+        msgDiv.innerHTML = `<div class="alert alert-danger" role="alert">Server error. Try again later.</div>`;
+      }
+    });
+
+    function getEmployeeById(empId) {
+      return employees.find(emp => String(emp.id) === String(empId));
+    }
+
+    function viewEmployee(id) {
+      const emp = getEmployeeById(id);
+      alert(`User: ${emp.username}\nRole: ${emp.role}\nEmail: ${emp.email}\nLeaves: ${emp.leaves}`);
+    }
+
+    async function editEmployee(id) {
+      const emp = getEmployeeById(id);
+      const newUsername = prompt('Edit username:', emp.username);
+      if (newUsername && newUsername.trim() !== '') {
+        const response = await fetch(`http://localhost:3000/api/users/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...emp, username: newUsername.trim() })
+        });
+        if (response.ok) await renderTable();
+        else alert('Failed to update employee');
+      }
+    }
+
+    async function deleteEmployee(id) {
+      if (confirm("Delete this employee?")) {
+        const response = await fetch(`http://localhost:3000/api/users/${id}`, { method: 'DELETE' });
+        if (response.ok) await renderTable();
+        else alert('Failed to delete employee');
+      }
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
